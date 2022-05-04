@@ -25,7 +25,7 @@
 </build>
 ```
 
-2. 在需要引入`HttpServletResponse`类时，在该项目的`pom.xml`的`dependencies`中添加如下依赖
+2. 在需要引入`HttpServletResponse`或`HttpServletRequest`类时，在该项目的`pom.xml`的`dependencies`中添加如下依赖
 
 ```xml
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.reine.dao.RoleDao">
+
+<!--    根据用户id查询关联的角色-->
+    <select id="findByUserId" parameterType="int" resultType="com.reine.pojo.Role">
+        SELECT r.*
+        FROM health.t_role r,
+             health.t_user_role ur
+        WHERE r.id = ur.role_id
+          AND ur.user_id = #{userId}
+    </select>
+</mapper>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.reine.dao.SetmealDao">
+    <insert id="add" parameterType="com.reine.pojo.Setmeal">
+        <!--    在插入数据后查询刚插入项自动生成的id，将该值赋值到Setmeal实体的id属性上-->
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into health.t_setmeal(name, code, helpCode, sex, age, price, remark, attention, img)
+        values (#{name}, #{code}, #{helpCode}, #{sex}, #{age}, #{price}, #{remark}, #{attention}, #{img})
+    </insert>
+    <!--    设置检查组于检查项的多对多关系-->
+    <insert id="setSetmealAndCheckGroup" parameterType="map">
+        insert into health.t_setmeal_checkgroup(setmeal_id, checkgroup_id)
+        values (#{setmeal_id}, #{checkgroup_id})
+    </insert>
+    <update id="edit" parameterType="com.reine.pojo.Setmeal">
+        update health.t_setmeal
+        <set>
+            <if test="age != null">
+                age = #{age},
+            </if>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="img != null">
+                img = #{img},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteById" parameterType="int">
+        delete
+        from health.t_setmeal
+        where id = #{id}
+    </delete>
+    <delete id="deleteAssociation" parameterType="int">
+        delete
+        from health.t_setmeal_checkgroup
+        where setmeal_id = #{id}
+    </delete>
+    <select id="findByCondition" parameterType="string" resultType="com.reine.pojo.Setmeal">
+        select *
+        from health.t_setmeal
+        <if test="value != null and value != '' and value.length > 0">
+            where code = #{code} or name = #{value} or helpCode = #{value}
+        </if>
+    </select>
+    <select id="findCheckGroupIdsBySetmealId" parameterType="int" resultType="java.lang.Integer">
+        select checkgroup_id
+        from health.t_setmeal_checkgroup
+        where setmeal_id = #{id}
+    </select>
+    <select id="findAll" resultType="com.reine.pojo.Setmeal">
+        select *
+        from health.t_setmeal
+    </select>
+    <select id="findSetmealCount" resultType="java.util.Map">
+        SELECT COUNT(o.id) `value`,
+               s.`name`
+        FROM health.t_order o,
+             health.t_setmeal s
+        WHERE o.setmeal_id = s.id
+        GROUP BY o.setmeal_id
+    </select>
+    <!--    根据套餐id查询套餐详情，包含套餐基本信息，检查组信息，检查项信息-->
+    <select id="findById4Detail" parameterType="int" resultMap="findByIdResultMap">
+        select *
+        from health.t_setmeal
+        where id = #{id}
+    </select>
+    <resultMap id="baseResultMap" type="com.reine.pojo.Setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+    <resultMap id="findByIdResultMap" type="com.reine.pojo.Setmeal" extends="baseResultMap">
+        <!--多对多映射-->
+        <collection
+                property="checkGroups"
+                ofType="com.reine.pojo.CheckGroup"
+                column="id"
+                select="com.reine.dao.CheckGroupDao.findCheckGroupById"
+        />
+    </resultMap>
+</mapper>
